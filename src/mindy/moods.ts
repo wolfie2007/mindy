@@ -34,7 +34,7 @@ export const MOOD_CONFIGS: Record<MindyMood, MoodConfig> = {
   alert: { eyeState: 'wide', wobAmp: 0.8, wobSpeed: 1.2 },
   happy: { eyeState: 'happy', wobAmp: 1.5, wobSpeed: 2.2 },
   confused: { eyeState: 'skeptical', wobAmp: 1.2, wobSpeed: 1.5 },
-  error: { eyeState: 'slit', wobAmp: 0.8, wobSpeed: 1.0 },
+  error: { eyeState: 'wince', wobAmp: 0.7, wobSpeed: 1.0 },
   excited: { eyeState: 'wide', wobAmp: 2.0, wobSpeed: 3.2 },
 };
 
@@ -60,7 +60,7 @@ export function deriveMindyColors(baseHex: string): MindyColors {
       main: baseHex,
       highlight: '#2a334d',
       shadow: '#040507',
-      rimLight: '#475569',
+      rimLight: '#64748b',
       accent: '#93c5fd',
       specular: 'rgba(255, 255, 255, 0.42)',
       ambientShadow: 'rgba(0, 0, 0, 0.45)',
@@ -73,7 +73,7 @@ export function deriveMindyColors(baseHex: string): MindyColors {
     highlight: hslToHex(h, Math.max(0, s - 0.12), Math.min(0.95, l + 0.16)),
     shadow: hslToHex(h, Math.min(1.0, s + 0.1), Math.max(0.08, l - 0.18)),
     rimLight: hslToHex(h, Math.max(0.15, s * 0.85), Math.min(0.88, l + 0.28)),
-    accent: hslToHex((h + 24) % 360, Math.min(1, s + 0.12), Math.min(0.82, Math.max(0.62, l + 0.18))),
+    accent: hslToHex((h + 24) % 360, Math.min(1, s + 0.12), Math.min(0.84, Math.max(0.64, l + 0.2))),
     specular: 'rgba(255, 255, 255, 0.52)',
     ambientShadow: 'rgba(15, 23, 42, 0.26)',
     contactShadow: 'rgba(15, 23, 42, 0.46)',

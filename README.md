@@ -84,7 +84,7 @@ export function Example() {
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `mood` | `'idle' \| 'thinking' \| 'loading' \| 'alert' \| 'happy' \| 'confused' \| 'error' \| 'excited'` | `'idle'` | Sets Mindy's pose, animation loop, and mood effects |
-| `eyeState` | `'capsule' \| 'happy' \| 'wide' \| 'skeptical' \| 'slit' \| 'thinking' \| 'hidden'` | from `mood` | Overrides the default eye expression for the active mood |
+| `eyeState` | `'capsule' \| 'happy' \| 'wide' \| 'wince' \| 'skeptical' \| 'slit' \| 'thinking' \| 'hidden'` | from `mood` | Overrides the default eye expression for the active mood |
 | `eyeLean` | `number` | `-10.5` | Rotates the eyes in degrees |
 | `size` | `number` | `240` | Width and height in pixels |
 | `color` | `string` | `'#006aed'` | Base hex color used to compute 3D shading and rim light |

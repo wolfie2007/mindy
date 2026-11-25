@@ -2,15 +2,14 @@ import { useId } from 'react';
 import { motion, useTransform } from 'motion/react';
 import { type MindyColors, type MindyMood } from './moods';
 import {
-  AlertOverlay,
+  AlertCrownFlare,
   ConfusedOverlay,
-  ErrorOverlay,
   ExcitedOverlay,
   GroundRipples,
   HappyOverlay,
   NotificationBadge,
   ThinkingBackOrbit,
-  ThinkingFrontOverlay,
+  ThinkingFrontOrbit,
 } from './mood-layers';
 import { type MindyMotion } from './use-mindy-motion';
 
@@ -37,10 +36,7 @@ export function MindyFigure({
     blushBlur: `mindy-blush-blur-${uid}`,
     bodyGrad: `mindy-body-${uid}`,
     blushGrad: `mindy-blush-${uid}`,
-    alertGrad: `mindy-alert-${uid}`,
-    confusedGrad: `mindy-confused-${uid}`,
     badgeGrad: `mindy-badge-${uid}`,
-    sweatGrad: `mindy-sweat-${uid}`,
     orbitGrad: `mindy-orbit-${uid}`,
   };
 
@@ -50,8 +46,8 @@ export function MindyFigure({
   const tightShadowRx = useTransform(m.shadowScale, (s) => (s ?? 1) * 40);
   const tightShadowRy = useTransform(m.shadowScale, (s) => (s ?? 1) * 5.5);
 
-  const rippleStroke =
-    mood === 'alert' ? '#fbbf24' : mood === 'excited' ? '#38bdf8' : colors.rimLight;
+  const rippleStroke = mood === 'excited' ? colors.accent : colors.rimLight;
+  const contourEchoStroke = mood === 'error' ? '#fb7185' : colors.rimLight;
 
   return (
     <svg
@@ -100,27 +96,10 @@ export function MindyFigure({
           <stop offset="100%" stopColor="#ff6b8b" stopOpacity="0" />
         </radialGradient>
 
-        <linearGradient id={ids.alertGrad} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#fef08a" />
-          <stop offset="45%" stopColor="#f59e0b" />
-          <stop offset="100%" stopColor="#d97706" />
-        </linearGradient>
-
-        <linearGradient id={ids.confusedGrad} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ddd6fe" />
-          <stop offset="45%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#6366f1" />
-        </linearGradient>
-
-        <linearGradient id={ids.sweatGrad} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#e0f2fe" />
-          <stop offset="100%" stopColor="#38bdf8" />
-        </linearGradient>
-
         <linearGradient id={ids.orbitGrad} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.2" />
-          <stop offset="50%" stopColor="#818cf8" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#c084fc" stopOpacity="0.2" />
+          <stop offset="0%" stopColor={colors.rimLight} stopOpacity="0.15" />
+          <stop offset="50%" stopColor={colors.accent} stopOpacity="0.95" />
+          <stop offset="100%" stopColor={colors.rimLight} stopOpacity="0.15" />
         </linearGradient>
 
         <radialGradient id={ids.badgeGrad} cx="32%" cy="28%" r="68%">
@@ -148,13 +127,11 @@ export function MindyFigure({
         opacity="0.52"
       />
 
-      {animated && (mood === 'alert' || mood === 'happy' || mood === 'excited') && (
+      {animated && (mood === 'happy' || mood === 'excited') && (
         <GroundRipples m={m} stroke={rippleStroke} />
       )}
 
-      {animated && mood === 'thinking' && <ThinkingBackOrbit m={m} colors={colors} ids={ids} />}
-
-      {/* Main character body stack */}
+      {/* Main character stack: everything attached to Mindy moves together here */}
       <motion.g style={{ x: m.shakeX, y: m.bobY }}>
         <motion.g
           style={{
@@ -163,6 +140,25 @@ export function MindyFigure({
             transformOrigin: '100px 110px',
           }}
         >
+          {/* Back half of 3D thinking orbit (behind Mindy, moves with bob & tilt) */}
+          {animated && mood === 'thinking' && <ThinkingBackOrbit m={m} colors={colors} ids={ids} />}
+
+          {/* Body-hugging contour echo wave for alert & error */}
+          {animated && (mood === 'alert' || mood === 'error') && (
+            <motion.path
+              d={m.bodyD}
+              fill="none"
+              stroke={contourEchoStroke}
+              strokeWidth="2.4"
+              style={{
+                scale: m.contourEchoScale,
+                opacity: m.contourEchoOpacity,
+                transformBox: 'fill-box',
+                transformOrigin: '100px 110px',
+              }}
+            />
+          )}
+
           <motion.g
             style={{
               scaleX: m.scaleX,
@@ -173,7 +169,6 @@ export function MindyFigure({
           >
             {mood !== 'loading' ? (
               <motion.g style={{ filter: grayFilter }}>
-                {/* Body volume */}
                 <motion.path d={m.bodyD} fill={`url(#${ids.bodyGrad})`} />
 
                 {/* Top-left specular highlight */}
@@ -187,19 +182,8 @@ export function MindyFigure({
                 <path
                   d="M 62 162 C 82 173 118 173 138 162 C 118 168 82 168 62 162 Z"
                   fill={colors.rimLight}
-                  opacity="0.32"
+                  opacity="0.34"
                 />
-
-                {/* Error warning rim pulse */}
-                {mood === 'error' && (
-                  <motion.path
-                    d={m.bodyD}
-                    fill="none"
-                    stroke="#fb7185"
-                    strokeWidth="2.5"
-                    style={{ opacity: m.warningRimOpacity }}
-                  />
-                )}
 
                 {/* Happy cheek blush */}
                 <motion.g style={{ opacity: m.cheekBlushOpacity }}>
@@ -224,7 +208,7 @@ export function MindyFigure({
                 {/* Alert crown flash */}
                 {mood === 'alert' && (
                   <motion.path
-                    d="M 80 48 C 94 42 106 42 120 48"
+                    d="M 78 48 C 92 41 108 41 122 48"
                     fill="none"
                     stroke="#ffffff"
                     strokeWidth="3.4"
@@ -277,18 +261,19 @@ export function MindyFigure({
               </motion.g>
             )}
           </motion.g>
+
+          {/* Body-locked mood layers (move & tilt as one with Mindy) */}
+          {animated && mood === 'thinking' && (
+            <ThinkingFrontOrbit m={m} colors={colors} ids={ids} />
+          )}
+          {animated && mood === 'alert' && <AlertCrownFlare m={m} colors={colors} ids={ids} />}
+          {animated && mood === 'confused' && <ConfusedOverlay m={m} colors={colors} ids={ids} />}
         </motion.g>
       </motion.g>
 
-      {/* Mood foreground layers */}
-      {animated && mood === 'thinking' && (
-        <ThinkingFrontOverlay m={m} colors={colors} ids={ids} />
-      )}
-      {animated && mood === 'alert' && <AlertOverlay m={m} colors={colors} ids={ids} />}
+      {/* Ambient sparkle fields around Mindy */}
       {animated && mood === 'happy' && <HappyOverlay m={m} colors={colors} ids={ids} />}
-      {animated && mood === 'confused' && <ConfusedOverlay m={m} colors={colors} ids={ids} />}
       {animated && mood === 'excited' && <ExcitedOverlay m={m} colors={colors} ids={ids} />}
-      {animated && mood === 'error' && <ErrorOverlay m={m} colors={colors} ids={ids} />}
 
       {hasNotification && <NotificationBadge m={m} colors={colors} ids={ids} />}
     </svg>

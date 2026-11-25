@@ -8,90 +8,52 @@ interface LayerProps {
   ids: {
     glow: string;
     shadowBlur: string;
-    alertGrad: string;
-    confusedGrad: string;
     badgeGrad: string;
-    sweatGrad: string;
     orbitGrad: string;
   };
 }
 
-/** Floor ripples shared by alert, happy, and excited states. */
+/** Floor ripples shared by happy and excited bounce landings. */
 export function GroundRipples({ m, stroke }: { m: MindyMotion; stroke: string }) {
   return (
-    <>
-      <motion.ellipse
-        cx="100"
-        cy="192"
-        rx={m.rippleRx}
-        ry={m.rippleRy}
-        fill="none"
-        stroke={stroke}
-        strokeWidth="2"
-        style={{ opacity: m.rippleOpacity }}
-      />
-      <motion.ellipse
-        cx="100"
-        cy="192"
-        rx={m.rippleOuterRx}
-        ry={m.rippleOuterRy}
-        fill="none"
-        stroke={stroke}
-        strokeWidth="1.2"
-        style={{ opacity: m.rippleOuterOpacity }}
-      />
-    </>
+    <motion.ellipse
+      cx="100"
+      cy="192"
+      rx={m.rippleRx}
+      ry={m.rippleRy}
+      fill="none"
+      stroke={stroke}
+      strokeWidth="2"
+      style={{ opacity: m.rippleOpacity }}
+    />
   );
 }
 
-/** Back half of the 3D orbital rings rendered behind Mindy's body. */
-export function ThinkingBackOrbit({ m, ids }: LayerProps) {
+/**
+ * Back arc + rear phase of the 3D orbital ring.
+ * Rendered inside Mindy's bob/rotate group so it moves as one with her.
+ */
+export function ThinkingBackOrbit({ m, colors, ids }: LayerProps) {
   return (
     <g>
-      <ellipse
-        cx="100"
-        cy="108"
-        rx="88"
-        ry="22"
-        fill="none"
-        stroke={`url(#${ids.orbitGrad})`}
-        strokeWidth="1.6"
-        strokeDasharray="3 5"
-        opacity="0.28"
-        transform="rotate(-16 100 108)"
-      />
-      <ellipse
-        cx="100"
-        cy="106"
-        rx="82"
-        ry="20"
-        fill="none"
-        stroke={`url(#${ids.orbitGrad})`}
-        strokeWidth="1.4"
-        strokeDasharray="3 5"
-        opacity="0.22"
-        transform="rotate(18 100 106)"
-      />
+      <g transform="rotate(-13 100 96)">
+        <path
+          d="M 12 96 A 88 22 0 0 1 188 96"
+          fill="none"
+          stroke={`url(#${ids.orbitGrad})`}
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          opacity="0.35"
+        />
+      </g>
       <motion.circle
-        cx={m.orbit1X}
-        cy={m.orbit1Y}
+        cx={m.orbitX}
+        cy={m.orbitY}
         r="5.5"
-        fill="#7dd3fc"
+        fill={colors.accent}
         style={{
-          scale: m.orbit1Scale,
-          opacity: m.orbit1BackOp,
-          transformBox: 'fill-box',
-          transformOrigin: 'center',
-        }}
-      />
-      <motion.circle
-        cx={m.orbit2X}
-        cy={m.orbit2Y}
-        r="4.8"
-        fill="#c4b5fd"
-        style={{
-          scale: m.orbit2Scale,
-          opacity: m.orbit2BackOp,
+          scale: m.orbitScale,
+          opacity: m.orbitBackOp,
           transformBox: 'fill-box',
           transformOrigin: 'center',
         }}
@@ -100,156 +62,120 @@ export function ThinkingBackOrbit({ m, ids }: LayerProps) {
   );
 }
 
-/** Front half of the 3D orbital pearls + rising thought trail rendered in front of Mindy. */
-export function ThinkingFrontOverlay({ m, ids }: LayerProps) {
+/**
+ * Front arc + luminous orbital pearl + subtle overhead crown reflection.
+ * Rendered inside Mindy's bob/rotate group so it stays locked to her movement.
+ */
+export function ThinkingFrontOrbit({ m, colors, ids }: LayerProps) {
   return (
     <g>
-      <motion.g
+      {/* Soft crown illumination as the orb passes overhead */}
+      <motion.path
+        d="M 74 49 C 90 42 110 42 126 49"
+        fill="none"
+        stroke={colors.rimLight}
+        strokeWidth="3.5"
+        strokeLinecap="round"
         filter={`url(#${ids.glow})`}
-        style={{
-          scale: m.orbit1Scale,
-          opacity: m.orbit1FrontOp,
-          transformBox: 'fill-box',
-          transformOrigin: 'center',
-        }}
-      >
-        <motion.circle cx={m.orbit1X} cy={m.orbit1Y} r="5.5" fill="#38bdf8" />
-        <motion.circle cx={m.orbit1X} cy={m.orbit1Y} r="2.2" fill="#ffffff" />
-      </motion.g>
+        style={{ opacity: m.orbitCrownGlow }}
+      />
+
+      <g transform="rotate(-13 100 96)">
+        <path
+          d="M 188 96 A 88 22 0 0 1 12 96"
+          fill="none"
+          stroke={`url(#${ids.orbitGrad})`}
+          strokeWidth="2.0"
+          strokeLinecap="round"
+          opacity="0.72"
+        />
+      </g>
 
       <motion.g
         filter={`url(#${ids.glow})`}
         style={{
-          scale: m.orbit2Scale,
-          opacity: m.orbit2FrontOp,
+          scale: m.orbitScale,
+          opacity: m.orbitFrontOp,
           transformBox: 'fill-box',
           transformOrigin: 'center',
         }}
       >
-        <motion.circle cx={m.orbit2X} cy={m.orbit2Y} r="4.8" fill="#a78bfa" />
-        <motion.circle cx={m.orbit2X} cy={m.orbit2Y} r="1.9" fill="#ffffff" />
-      </motion.g>
-
-      {/* Rising frosted thought pearls above right brow */}
-      <motion.circle
-        cx="134"
-        cy={m.thoughtPearl1Y}
-        r="3.2"
-        fill="#bae6fd"
-        opacity="0.85"
-      />
-      <motion.circle
-        cx="146"
-        cy={m.thoughtPearl2Y}
-        r="4.8"
-        fill="#7dd3fc"
-        opacity="0.92"
-      />
-      <motion.g filter={`url(#${ids.glow})`}>
-        <motion.circle cx="160" cy={m.thoughtPearl3Y} r="7.2" fill="#e0f2fe" />
-        <motion.circle cx="158" cy={m.thoughtPearl3Y} r="2.6" fill="#ffffff" opacity="0.9" />
+        <motion.circle cx={m.orbitX} cy={m.orbitY} r="5.5" fill={colors.accent} />
+        <motion.circle cx={m.orbitX} cy={m.orbitY} r="2.2" fill="#ffffff" />
       </motion.g>
     </g>
   );
 }
 
-/** Kinetic radial attention rays + sculpted pill exclamation mark. */
-export function AlertOverlay({ m, ids }: LayerProps) {
+/**
+ * Tight geometric crown flare attached directly above Mindy's apex.
+ * Rendered inside Mindy's bob/rotate group so it jumps and tilts with her.
+ */
+export function AlertCrownFlare({ m, colors, ids }: LayerProps) {
   return (
-    <g>
-      {/* Radial attention sparks */}
-      <motion.g
-        filter={`url(#${ids.glow})`}
-        style={{
-          scale: m.alertRaysScale,
-          opacity: m.alertRaysOpacity,
-          transformBox: 'fill-box',
-          transformOrigin: '100px 38px',
-        }}
-      >
-        <line
-          x1="74"
-          y1="28"
-          x2="64"
-          y2="16"
-          stroke="#fbbf24"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-        />
-        <line
-          x1="126"
-          y1="28"
-          x2="136"
-          y2="16"
-          stroke="#fbbf24"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-        />
-        <line
-          x1="56"
-          y1="44"
-          x2="44"
-          y2="37"
-          stroke="#fde68a"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
-        <line
-          x1="144"
-          y1="44"
-          x2="156"
-          y2="37"
-          stroke="#fde68a"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
-      </motion.g>
-
-      {/* Sculpted 3D pill exclamation mark */}
-      <motion.g
-        filter={`url(#${ids.glow})`}
-        style={{
-          y: m.alertPipY,
-          scale: m.alertPipScale,
-          opacity: m.alertPipOpacity,
-          transformBox: 'fill-box',
-          transformOrigin: '100px 0px',
-        }}
-      >
-        <rect
-          x="96"
-          y="-16"
-          width="8"
-          height="18"
-          rx="4"
-          fill={`url(#${ids.alertGrad})`}
-        />
-        <rect x="97.8" y="-14" width="2.2" height="12" rx="1.1" fill="#ffffff" opacity="0.65" />
-        <circle cx="100" cy="8.5" r="4" fill={`url(#${ids.alertGrad})`} />
-        <circle cx="99" cy="7.5" r="1.3" fill="#ffffff" opacity="0.7" />
-      </motion.g>
-    </g>
+    <motion.g
+      filter={`url(#${ids.glow})`}
+      style={{
+        scale: m.alertFlareScale,
+        opacity: m.alertFlareOpacity,
+        transformBox: 'fill-box',
+        transformOrigin: '100px 40px',
+      }}
+    >
+      {/* Center crisp flare ray */}
+      <line
+        x1="100"
+        y1="30"
+        x2="100"
+        y2="16"
+        stroke="#ffffff"
+        strokeWidth="3.6"
+        strokeLinecap="round"
+      />
+      {/* Left & right angled rays */}
+      <line
+        x1="83"
+        y1="34"
+        x2="75"
+        y2="22"
+        stroke={colors.rimLight}
+        strokeWidth="3.0"
+        strokeLinecap="round"
+      />
+      <line
+        x1="117"
+        y1="34"
+        x2="125"
+        y2="22"
+        stroke={colors.rimLight}
+        strokeWidth="3.0"
+        strokeLinecap="round"
+      />
+    </motion.g>
   );
 }
 
 /** Four independently twinkling diamond glints for the happy state. */
-export function HappyOverlay({ m, ids }: LayerProps) {
+export function HappyOverlay({ m, colors, ids }: LayerProps) {
   return (
     <g filter={`url(#${ids.glow})`}>
       <DiamondSpark x={164} y={50} size={7.5} fill="#fbbf24" scale={m.glint1Scale} />
-      <DiamondSpark x={35} y={64} size={6.0} fill="#fde68a" scale={m.glint2Scale} />
+      <DiamondSpark x={35} y={64} size={6.0} fill={colors.rimLight} scale={m.glint2Scale} />
       <DiamondSpark x={169} y={132} size={5.2} fill="#fcd34d" scale={m.glint3Scale} />
       <DiamondSpark x={32} y={136} size={5.8} fill="#ffffff" scale={m.glint4Scale} />
     </g>
   );
 }
 
-/** Sculpted floating '?' glyph + curiosity motes for the confused state. */
-export function ConfusedOverlay({ m, ids }: LayerProps) {
+/**
+ * Sculpted '?' glyph + curiosity motes anchored inside Mindy's transform stack
+ * and color-harmonized with her active palette.
+ */
+export function ConfusedOverlay({ m, colors, ids }: LayerProps) {
   return (
     <g>
-      <motion.circle cx="136" cy={m.mote1Y} r="2.8" fill="#a78bfa" opacity="0.75" />
-      <motion.circle cx="172" cy={m.mote2Y} r="2.2" fill="#c4b5fd" opacity="0.7" />
+      <motion.circle cx="136" cy={m.mote1Y} r="2.6" fill={colors.rimLight} opacity="0.78" />
+      <motion.circle cx="170" cy={m.mote2Y} r="2.1" fill={colors.accent} opacity="0.72" />
 
       <motion.g
         filter={`url(#${ids.glow})`}
@@ -258,37 +184,34 @@ export function ConfusedOverlay({ m, ids }: LayerProps) {
           rotate: m.questionRotate,
           opacity: m.questionOpacity,
           transformBox: 'fill-box',
-          transformOrigin: '156px 0px',
+          transformOrigin: '154px 0px',
         }}
       >
-        {/* Soft shadow offset */}
         <path
-          d="M 149 -10 C 149 -18 163 -18 163 -10 C 163 -5 156 -4 156 1"
+          d="M 148 -9 C 148 -17 161 -17 161 -9 C 161 -4.5 154.5 -3.5 154.5 1"
           fill="none"
           stroke="rgba(15, 23, 42, 0.35)"
-          strokeWidth="6.5"
+          strokeWidth="6"
           strokeLinecap="round"
-          transform="translate(1.5 2)"
+          transform="translate(1.2 1.8)"
         />
-        {/* Sculpted '?' curve */}
         <path
-          d="M 149 -10 C 149 -18 163 -18 163 -10 C 163 -5 156 -4 156 1"
+          d="M 148 -9 C 148 -17 161 -17 161 -9 C 161 -4.5 154.5 -3.5 154.5 1"
           fill="none"
-          stroke={`url(#${ids.confusedGrad})`}
-          strokeWidth="5.5"
+          stroke={colors.rimLight}
+          strokeWidth="5"
           strokeLinecap="round"
         />
-        {/* Inner specular highlight */}
         <path
-          d="M 150.5 -11.5 C 151 -16 160 -16.5 161.2 -11"
+          d="M 149.5 -10.5 C 150 -15 158.5 -15.5 159.5 -10"
           fill="none"
           stroke="#ffffff"
           strokeWidth="1.4"
           strokeLinecap="round"
-          opacity="0.7"
+          opacity="0.75"
         />
-        <circle cx="156" cy="9" r="3.1" fill={`url(#${ids.confusedGrad})`} />
-        <circle cx="155" cy="8" r="1.0" fill="#ffffff" opacity="0.75" />
+        <circle cx="154.5" cy="8.5" r="2.8" fill={colors.rimLight} />
+        <circle cx="153.8" cy="7.8" r="1.0" fill="#ffffff" opacity="0.8" />
       </motion.g>
     </g>
   );
@@ -298,11 +221,10 @@ export function ConfusedOverlay({ m, ids }: LayerProps) {
 export function ExcitedOverlay({ m, colors, ids }: LayerProps) {
   return (
     <g>
-      {/* Sweeping velocity arcs around left & right flanks */}
       <motion.path
         d="M 24 134 C 14 96 28 56 58 38"
         fill="none"
-        stroke="#38bdf8"
+        stroke={colors.rimLight}
         strokeWidth="3.2"
         strokeLinecap="round"
         strokeDasharray="34 26"
@@ -320,36 +242,15 @@ export function ExcitedOverlay({ m, colors, ids }: LayerProps) {
         style={{ strokeDashoffset: m.excitedArcOffset }}
       />
 
-      {/* Staggered celebration bursts */}
       <g filter={`url(#${ids.glow})`}>
-        <DiamondSpark x={162} y={42} size={8} fill="#67e8f9" scale={m.glint1Scale} />
+        <DiamondSpark x={162} y={42} size={8} fill={colors.rimLight} scale={m.glint1Scale} />
         <DiamondSpark x={38} y={54} size={6.5} fill="#fcd34d" scale={m.glint2Scale} />
         <DiamondSpark x={176} y={118} size={6} fill="#ffffff" scale={m.glint3Scale} />
-        <DiamondSpark x={24} y={122} size={5.5} fill="#c084fc" scale={m.glint4Scale} />
+        <DiamondSpark x={24} y={122} size={5.5} fill={colors.accent} scale={m.glint4Scale} />
         <DiamondSpark x={136} y={24} size={5} fill="#fbbf24" scale={m.glint5Scale} />
-        <DiamondSpark x={64} y={26} size={4.8} fill="#38bdf8" scale={m.glint6Scale} />
+        <DiamondSpark x={64} y={26} size={4.8} fill="#ffffff" scale={m.glint6Scale} />
       </g>
     </g>
-  );
-}
-
-/** Expressive sliding brow droplet for the error state. */
-export function ErrorOverlay({ m, ids }: LayerProps) {
-  return (
-    <motion.g
-      style={{
-        y: m.sweatDropY,
-        opacity: m.sweatDropOpacity,
-      }}
-    >
-      <path
-        d="M 156 -8 C 160 -2 162 1.5 162 4 A 6 6 0 1 1 150 4 C 150 1.5 152 -2 156 -8 Z"
-        fill={`url(#${ids.sweatGrad})`}
-        stroke="rgba(255,255,255,0.65)"
-        strokeWidth="1.1"
-      />
-      <ellipse cx="154" cy="3.5" rx="1.5" ry="2.6" fill="#ffffff" opacity="0.8" />
-    </motion.g>
   );
 }
 

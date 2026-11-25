@@ -2,6 +2,7 @@ export type MindyEyeState =
   | 'capsule'
   | 'happy'
   | 'wide'
+  | 'wince'
   | 'skeptical'
   | 'slit'
   | 'thinking'
@@ -11,6 +12,7 @@ export const MINDY_EYE_STATES = [
   'capsule',
   'happy',
   'wide',
+  'wince',
   'skeptical',
   'slit',
   'thinking',
@@ -107,6 +109,54 @@ function getHappyCrescent(cx: number, cy: number, w: number, hMax: number, open 
 }
 
 /**
+ * Generates a rounded geometric chevron ('>' when dir=1, '<' when dir=-1) for wincing eyes.
+ */
+function getWinceChevronPath(
+  cx: number,
+  cy: number,
+  dir: 1 | -1,
+  persp = 1.0,
+  open = 1.0,
+): string {
+  const ax = -7.5 * persp;
+  const bx = 7.5 * persp;
+  const hh = 10.5 * Math.max(0.32, open);
+  const t = 2.6;
+
+  const dx = bx - ax;
+  const dy = hh;
+  const len = Math.hypot(dx, dy);
+  const nx = dy / len;
+  const ny = -dx / len;
+  const tx = dx / len;
+  const ty = dy / len;
+
+  const p = (lx: number, ly: number) => `${f(cx + lx * dir)} ${f(cy + ly)}`;
+
+  const topOuter = p(ax + nx * t, -hh + ny * t);
+  const tipUpper = p(bx + nx * t, ny * t);
+  const tipApex = p(bx + t * 1.45, 0);
+  const tipLower = p(bx + nx * t, -ny * t);
+  const botOuter = p(ax + nx * t, hh - ny * t);
+  const botCapCtrl = p(ax - tx * t * 1.5, hh - ty * t * 1.5);
+  const botInner = p(ax - nx * t, hh + ny * t);
+  const innerApex = p(bx - t * 1.45, 0);
+  const topInner = p(ax - nx * t, -hh - ny * t);
+  const topCapCtrl = p(ax - tx * t * 1.5, -hh - ty * t * 1.5);
+
+  return (
+    `M ${topOuter} ` +
+    `L ${tipUpper} ` +
+    `Q ${tipApex} ${tipLower} ` +
+    `L ${botOuter} ` +
+    `Q ${botCapCtrl} ${botInner} ` +
+    `L ${innerApex} ` +
+    `L ${topInner} ` +
+    `Q ${topCapCtrl} ${topOuter} Z`
+  );
+}
+
+/**
  * Projects Mindy's eyes onto a 3D sphere centered at (100, 110) with foreshortening.
  */
 export function computeSphericalEyeLayout(
@@ -154,6 +204,16 @@ export function computeSphericalEyeLayout(
     return {
       leftD: getHappyCrescent(cxL, cyL + 3, 24, 14, blinkOpen, false),
       rightD: getHappyCrescent(cxR, cyR + 3, 22, 13, blinkOpen, true),
+      visible: true,
+      glintLeft: { cx: cxL, cy: cyL, r: 0, opacity: 0 },
+      glintRight: { cx: cxR, cy: cyR, r: 0, opacity: 0 },
+    };
+  }
+
+  if (state === 'wince') {
+    return {
+      leftD: getWinceChevronPath(cxL - 1, cyL + 1, 1, perspL, blinkOpen),
+      rightD: getWinceChevronPath(cxR + 1, cyR + 1, -1, perspR, blinkOpen),
       visible: true,
       glintLeft: { cx: cxL, cy: cyL, r: 0, opacity: 0 },
       glintRight: { cx: cxR, cy: cyR, r: 0, opacity: 0 },
@@ -214,7 +274,6 @@ export function computeSphericalEyeLayout(
     };
   }
 
-  // Default capsule expression
   const wL = 17 * perspL;
   const wR = 15 * perspR;
 
