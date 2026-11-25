@@ -4,7 +4,7 @@ An open-source animated SVG mascot for React apps, AI assistants, and loading st
 
 I wanted a character that actually feels alive instead of a looping Lottie file or a static icon. Mindy is pure vector SVG driven by Motion springs and a small frame loop—she tracks your cursor with 3D-projected eyes, blinks naturally (with occasional double-blinks), squashes when you click her, and switches between 8 moods.
 
-You can play with the colors, eye expressions, tilt, and moods in the tuning studio and copy the exact `<Mindy />` JSX into your project.
+You can play with the colors, eye expressions, tilt, and moods in the [live tuning studio](https://mindymascot.vercel.app) and copy the exact `<Mindy />` JSX into your project.
 
 ---
 
