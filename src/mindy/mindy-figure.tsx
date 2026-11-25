@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { motion, useTransform } from 'motion/react';
 import { type MindyColors, type MindyMood } from './moods';
 import {
-  AlertCrownFlare,
+  AlertPip,
   ConfusedOverlay,
   ExcitedOverlay,
   GroundRipples,
@@ -36,6 +36,7 @@ export function MindyFigure({
     blushBlur: `mindy-blush-blur-${uid}`,
     bodyGrad: `mindy-body-${uid}`,
     blushGrad: `mindy-blush-${uid}`,
+    alertGrad: `mindy-alert-${uid}`,
     badgeGrad: `mindy-badge-${uid}`,
     orbitGrad: `mindy-orbit-${uid}`,
   };
@@ -47,7 +48,6 @@ export function MindyFigure({
   const tightShadowRy = useTransform(m.shadowScale, (s) => (s ?? 1) * 5.5);
 
   const rippleStroke = mood === 'excited' ? colors.accent : colors.rimLight;
-  const contourEchoStroke = mood === 'error' ? '#fb7185' : colors.rimLight;
 
   return (
     <svg
@@ -96,6 +96,12 @@ export function MindyFigure({
           <stop offset="100%" stopColor="#ff6b8b" stopOpacity="0" />
         </radialGradient>
 
+        <linearGradient id={ids.alertGrad} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#fde047" />
+          <stop offset="50%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+
         <linearGradient id={ids.orbitGrad} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor={colors.rimLight} stopOpacity="0.15" />
           <stop offset="50%" stopColor={colors.accent} stopOpacity="0.95" />
@@ -142,38 +148,6 @@ export function MindyFigure({
         >
           {animated && mood === 'thinking' && <ThinkingBackOrbit m={m} colors={colors} ids={ids} />}
 
-          {/* Body-hugging contour echo waves for alert & error */}
-          {animated && (mood === 'alert' || mood === 'error') && (
-            <>
-              <motion.path
-                d={m.bodyD}
-                fill="none"
-                stroke={contourEchoStroke}
-                strokeWidth="2.8"
-                style={{
-                  scale: m.contourEchoScale,
-                  opacity: m.contourEchoOpacity,
-                  transformBox: 'fill-box',
-                  transformOrigin: '100px 110px',
-                }}
-              />
-              {mood === 'alert' && (
-                <motion.path
-                  d={m.bodyD}
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="1.6"
-                  style={{
-                    scale: m.contourEcho2Scale,
-                    opacity: m.contourEcho2Opacity,
-                    transformBox: 'fill-box',
-                    transformOrigin: '100px 110px',
-                  }}
-                />
-              )}
-            </>
-          )}
-
           <motion.g
             style={{
               scaleX: m.scaleX,
@@ -185,15 +159,6 @@ export function MindyFigure({
             {mood !== 'loading' ? (
               <motion.g style={{ filter: grayFilter }}>
                 <motion.path d={m.bodyD} fill={`url(#${ids.bodyGrad})`} />
-
-                {/* Subtle coral tint pulse inside body during error */}
-                {mood === 'error' && (
-                  <motion.path
-                    d={m.bodyD}
-                    fill="#fb7185"
-                    style={{ opacity: m.errorTintOpacity }}
-                  />
-                )}
 
                 {/* Top-left specular highlight */}
                 <path
@@ -228,19 +193,6 @@ export function MindyFigure({
                     filter={`url(#${ids.blushBlur})`}
                   />
                 </motion.g>
-
-                {/* Alert crown flash */}
-                {mood === 'alert' && (
-                  <motion.path
-                    d="M 78 48 C 92 41 108 41 122 48"
-                    fill="none"
-                    stroke="#ffffff"
-                    strokeWidth="3.4"
-                    strokeLinecap="round"
-                    filter={`url(#${ids.glow})`}
-                    style={{ opacity: m.alertCrownFlash }}
-                  />
-                )}
               </motion.g>
             ) : (
               <g filter={`url(#${ids.goo})`}>
@@ -290,7 +242,7 @@ export function MindyFigure({
           {animated && mood === 'thinking' && (
             <ThinkingFrontOrbit m={m} colors={colors} ids={ids} />
           )}
-          {animated && mood === 'alert' && <AlertCrownFlare m={m} colors={colors} ids={ids} />}
+          {animated && mood === 'alert' && <AlertPip m={m} colors={colors} ids={ids} />}
           {animated && mood === 'confused' && <ConfusedOverlay m={m} colors={colors} ids={ids} />}
         </motion.g>
       </motion.g>

@@ -8,6 +8,7 @@ interface LayerProps {
   ids: {
     glow: string;
     shadowBlur: string;
+    alertGrad: string;
     badgeGrad: string;
     orbitGrad: string;
   };
@@ -101,39 +102,34 @@ export function ThinkingFrontOrbit({ m, colors, ids }: LayerProps) {
 }
 
 /**
- * Sculpted teardrop crown sparks anchored directly above Mindy's apex.
- * Rendered inside Mindy's bob/rotate group so they move as one with her.
+ * Clean, unboxed 3D exclamation glyph anchored inside Mindy's transform stack.
  */
-export function AlertCrownFlare({ m, colors, ids }: LayerProps) {
+export function AlertPip({ m, ids }: LayerProps) {
   return (
     <motion.g
       filter={`url(#${ids.glow})`}
       style={{
-        scale: m.alertFlareScale,
-        opacity: m.alertFlareOpacity,
+        y: m.alertPipY,
+        scale: m.alertPipScale,
+        opacity: m.alertPipOpacity,
         transformBox: 'fill-box',
-        transformOrigin: '100px 38px',
+        transformOrigin: '100px 0px',
       }}
     >
-      {/* Center teardrop spark */}
+      {/* Subtle drop shadow */}
+      <rect x="96.8" y="-14.5" width="8.5" height="19" rx="4.25" fill="rgba(15, 23, 42, 0.35)" />
+      <circle cx="101.2" cy="11.2" r="4.2" fill="rgba(15, 23, 42, 0.35)" />
+
+      {/* Tapered pill bar */}
       <path
-        d="M 100 12 C 102.8 18 103.5 23 100 31 C 96.5 23 97.2 18 100 12 Z"
-        fill="#ffffff"
+        d="M 95.6 -13 C 95.6 -16 104.4 -16 104.4 -13 L 103.3 1.2 C 103.1 3.2 96.9 3.2 96.7 1.2 Z"
+        fill={`url(#${ids.alertGrad})`}
       />
-      {/* Left angled teardrop spark */}
-      <g transform="rotate(-28 100 40)">
-        <path
-          d="M 100 15 C 102.2 20 102.6 24 100 30 C 97.4 24 97.8 20 100 15 Z"
-          fill={colors.rimLight}
-        />
-      </g>
-      {/* Right angled teardrop spark */}
-      <g transform="rotate(28 100 40)">
-        <path
-          d="M 100 15 C 102.2 20 102.6 24 100 30 C 97.4 24 97.8 20 100 15 Z"
-          fill={colors.rimLight}
-        />
-      </g>
+      <rect x="97.8" y="-13" width="2" height="11" rx="1" fill="#ffffff" opacity="0.7" />
+
+      {/* Dot */}
+      <circle cx="100" cy="9.5" r="4.1" fill={`url(#${ids.alertGrad})`} />
+      <circle cx="98.8" cy="8.3" r="1.3" fill="#ffffff" opacity="0.75" />
     </motion.g>
   );
 }
