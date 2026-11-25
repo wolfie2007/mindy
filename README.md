@@ -1,55 +1,115 @@
 # Mindy
 
-An open-source animated SVG mascot for React, extracted from SiteMind AI and packaged with an interactive tuning studio.
+An open-source animated SVG mascot for React apps, AI assistants, and loading states.
 
-Mindy renders pure vector geometry with:
-- **3D spherical geodesic eyes** with decoupled gaze tracking, micro-saccades, and biological blinking
-- **8 expressive moods** (`idle`, `thinking`, `loading`, `alert`, `happy`, `confused`, `error`, `excited`)
-- **Modal harmonic breathing** and volume-conserved squash-and-stretch physics
-- **Molten SVG goo metaball loader** for the `loading` state
-- **Single-hex color derivation** that generates 3D highlights, shadows, and speculars from any brand color
-- **Reduced-motion & visibility-aware** animation loop (pauses when off-screen or in background tabs)
+I wanted a character that actually feels alive instead of a looping Lottie file or a static icon. Mindy is pure vector SVG driven by Motion springs and a small frame loop—she tracks your cursor with 3D-projected eyes, blinks naturally (with occasional double-blinks), squashes when you click her, and switches between 8 moods.
 
-## Quick Start (Studio)
+You can play with the colors, eye expressions, tilt, and moods in the tuning studio and copy the exact `<Mindy />` JSX into your project.
+
+---
+
+## What's inside
+
+- **8 expressive moods** — `idle`, `thinking`, `loading`, `alert`, `happy`, `confused`, `error`, and `excited`
+- **3D spherical eye projection** — eyes wrap along a sphere with depth foreshortening, gaze lead, head lag, and idle micro-saccades
+- **One-hex color theming** — pass any hex color (`color="#006aed"`) and Mindy derives her own 3D highlights, rim light, and shadows
+- **Molten goo loader** — the `loading` state morphs into three coalescing liquid droplets using an SVG goo filter
+- **Respects your browser** — pauses when off-screen or in a background tab, and scales down cleanly under `prefers-reduced-motion`
+- **Interactive tuning studio** — test light/dark backdrops, tweak eye expressions and tilt, trigger actions, and copy ready-to-use JSX
+
+---
+
+## Run the tuning studio locally
 
 ```bash
+git clone https://github.com/wolfie2007/mindy.git
+cd mindy
 npm install
 npm run dev
 ```
 
-## Using `<Mindy />` in Your App
+---
 
-Copy `src/mindy/` into your React project (requires `motion` and React 18/19):
+## Use `<Mindy />` in your React app
+
+Mindy only needs React (18 or 19) and `motion`.
+
+```bash
+npm install motion
+```
+
+Copy `src/mindy/` into your project and render `<Mindy />` anywhere:
 
 ```tsx
 import { Mindy } from './mindy';
 
-export function Example() {
+export function AssistantAvatar() {
   return (
     <Mindy
-      mood="happy"
+      mood="thinking"
       color="#006aed"
-      size={220}
+      size={180}
       interactive
     />
   );
 }
 ```
 
-### Props
+### Triggering actions with a ref
 
-| Prop | Type | Default | Description |
+If you want to make Mindy bounce, spin, or wiggle on an event (like a message arriving or a form error):
+
+```tsx
+import { useRef } from 'react';
+import { Mindy, type MindyHandle } from './mindy';
+
+export function Example() {
+  const mindyRef = useRef<MindyHandle>(null);
+
+  return (
+    <>
+      <Mindy ref={mindyRef} />
+      <button onClick={() => mindyRef.current?.trigger('bounce')}>
+        Bounce
+      </button>
+    </>
+  );
+}
+```
+
+---
+
+## Props
+
+| Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `mood` | `MindyMood` | `'idle'` | `'idle' \| 'thinking' \| 'loading' \| 'alert' \| 'happy' \| 'confused' \| 'error' \| 'excited'` |
-| `eyeState` | `MindyEyeState` | auto (from mood) | Override eye expression: `'capsule' \| 'happy' \| 'wide' \| 'skeptical' \| 'slit' \| 'thinking' \| 'hidden'` |
-| `eyeLean` | `number` | `-10.5` | Eye lean angle in degrees |
-| `size` | `number` | `240` | Width & height in pixels |
-| `color` | `string` | `'#006aed'` | Any hex color; 3D highlights & shadows are derived automatically |
-| `interactive` | `boolean` | `true` | Enables pointer gaze tracking and click bounce |
-| `hasNotification` | `boolean` | `false` | Renders the 3D enamel notification pip |
-| `reducedMotion` | `boolean` | system preference | Overrides `prefers-reduced-motion` |
-| `holdAfterMs` | `number` | `undefined` | Optionally stops the animation loop after settling |
+| `mood` | `'idle' \| 'thinking' \| 'loading' \| 'alert' \| 'happy' \| 'confused' \| 'error' \| 'excited'` | `'idle'` | Sets Mindy's pose, animation loop, and mood effects |
+| `eyeState` | `'capsule' \| 'happy' \| 'wide' \| 'skeptical' \| 'slit' \| 'thinking' \| 'hidden'` | from `mood` | Overrides the default eye expression for the active mood |
+| `eyeLean` | `number` | `-10.5` | Rotates the eyes in degrees |
+| `size` | `number` | `240` | Width and height in pixels |
+| `color` | `string` | `'#006aed'` | Base hex color used to compute 3D shading and rim light |
+| `interactive` | `boolean` | `true` | Enables cursor gaze tracking and click-to-bounce |
+| `hasNotification` | `boolean` | `false` | Renders a floating 3D notification pip |
+| `reducedMotion` | `boolean` | system setting | Overrides `prefers-reduced-motion` |
+| `holdAfterMs` | `number` | `undefined` | Optionally stops the animation loop after a mood settles |
+| `onClick` | `() => void` | `undefined` | Click handler |
+
+---
+
+## Lightweight loading-only variant
+
+If you just want the molten droplet loader without the interactive motion hook, import `LoadingMindy`:
+
+```tsx
+import { LoadingMindy } from './mindy';
+
+export function PageLoader() {
+  return <LoadingMindy size={120} color="#006aed" />;
+}
+```
+
+---
 
 ## License
 
-MIT
+MIT — use it in personal sites, AI chat widgets, SaaS products, or wherever else you want.

@@ -1,5 +1,5 @@
 export { Mindy } from './Mindy';
-export type { MindyProps } from './Mindy';
+export type { MindyProps, MindyHandle } from './Mindy';
 export { LoadingMindy } from './loading-mindy';
 export { MINDY_MOODS, deriveMindyColors } from './moods';
 export type { MindyMood, MindyColors } from './moods';

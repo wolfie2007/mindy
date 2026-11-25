@@ -1,49 +1,62 @@
 import {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { motion } from 'motion/react';
-
-import { MindyFigure } from './mindy-figure';
 import { type MindyEyeState } from './eyes';
+import { MindyFigure } from './mindy-figure';
 import { deriveMindyColors, type MindyMood } from './moods';
-import { useMindyMotion } from './use-mindy-motion';
+import { type MindyAction, useMindyMotion } from './use-mindy-motion';
+
+export interface MindyHandle {
+  trigger: (action: MindyAction) => void;
+}
 
 export interface MindyProps {
   mood?: MindyMood;
-  /** Optional eye expression override (defaults to the mood's built-in expression). */
+  /** Override the eye expression instead of using the mood default. */
   eyeState?: MindyEyeState;
   /** Eye lean angle in degrees (default: -10.5). */
   eyeLean?: number;
+  /** Width and height in pixels (default: 240). */
   size?: number;
+  /** Base hex color; 3D highlights and shadows are derived automatically. */
   color?: string;
+  /** Enables pointer gaze tracking and click-to-bounce physics. */
   interactive?: boolean;
+  /** Shows a floating 3D notification pip. */
   hasNotification?: boolean;
+  /** Overrides system prefers-reduced-motion. */
   reducedMotion?: boolean;
+  /** Optionally stop the frame loop this many ms after a mood change. */
   holdAfterMs?: number;
   className?: string;
   onClick?: () => void;
 }
 
-export function Mindy({
-  mood = 'idle',
-  eyeState,
-  eyeLean,
-  size = 240,
-  color = '#006aed',
-  interactive = true,
-  hasNotification = false,
-  reducedMotion: reducedMotionProp,
-  holdAfterMs,
-  className,
-  onClick,
-}: MindyProps) {
+export const Mindy = forwardRef<MindyHandle, MindyProps>(function Mindy(
+  {
+    mood = 'idle',
+    eyeState,
+    eyeLean,
+    size = 240,
+    color = '#006aed',
+    interactive = true,
+    hasNotification = false,
+    reducedMotion: reducedMotionProp,
+    holdAfterMs,
+    className,
+    onClick,
+  },
+  ref,
+) {
   const hostRef = useRef<HTMLDivElement>(null);
-
   const [inView, setInView] = useState(true);
   const [tabHidden, setTabHidden] = useState(false);
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
@@ -56,11 +69,11 @@ export function Mindy({
   );
 
   useEffect(() => {
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setSystemReducedMotion(motionQuery.matches);
-    const onMotionChange = (event: MediaQueryListEvent) => setSystemReducedMotion(event.matches);
-    motionQuery.addEventListener('change', onMotionChange);
-    return () => motionQuery.removeEventListener('change', onMotionChange);
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setSystemReducedMotion(query.matches);
+    const onChange = (event: MediaQueryListEvent) => setSystemReducedMotion(event.matches);
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
   }, []);
 
   useEffect(() => {
@@ -68,8 +81,7 @@ export function Mindy({
     if (!host) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0];
-        if (entry) setInView(entry.isIntersecting);
+        if (entries[0]) setInView(entries[0].isIntersecting);
       },
       { threshold: 0.05 },
     );
@@ -95,6 +107,14 @@ export function Mindy({
     reducedMotion,
     holdAfterMs,
   });
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      trigger: (action: MindyAction) => motionValues.triggerAction(action),
+    }),
+    [motionValues],
+  );
 
   const handlePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -142,4 +162,4 @@ export function Mindy({
       />
     </motion.div>
   );
-}
+});
