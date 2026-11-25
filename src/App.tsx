@@ -37,9 +37,12 @@ function readInitialState() {
   return {
     mood: moodParam && MINDY_MOODS.includes(moodParam) ? moodParam : undefined,
     eye: eyeParam && MINDY_EYE_STATES.includes(eyeParam) ? eyeParam : undefined,
-    color: colorParam && /^#?[0-9a-fA-F]{6}$/.test(colorParam)
-      ? (colorParam.startsWith('#') ? colorParam : `#${colorParam}`)
-      : undefined,
+    color:
+      colorParam && /^#?[0-9a-fA-F]{6}$/.test(colorParam)
+        ? colorParam.startsWith('#')
+          ? colorParam
+          : `#${colorParam}`
+        : undefined,
     size: Number.isFinite(sizeParam) && sizeParam >= 48 && sizeParam <= 320 ? sizeParam : undefined,
     lean: Number.isFinite(leanParam) && leanParam >= -24 && leanParam <= 24 ? leanParam : undefined,
     badge: params.get('badge') === '1',
@@ -66,7 +69,7 @@ export default function App() {
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
 
-  // Sync keyboard shortcuts 1–8 for moods
+  // Keyboard shortcuts 1–8 for moods
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -163,20 +166,20 @@ export default function App() {
   const isLightStage = stageTheme === 'light';
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#09090b] text-[#f4f4f5]">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#09090b] text-[#f4f4f5]">
       {/* Header */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.1] px-5 sm:px-7">
-        <div className="flex items-center gap-3">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.1] px-4 sm:px-6">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <Mindy mood={mood} color={color} size={28} interactive={false} />
           <div className="flex items-baseline gap-2.5">
             <span className="text-[15px] font-semibold tracking-tight text-white">Mindy</span>
-            <span className="hidden text-xs text-[#a1a1aa] sm:inline">
+            <span className="hidden text-xs text-[#a1a1aa] md:inline">
               Open-source animated mascot for React
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={copyShareUrl}
@@ -186,7 +189,7 @@ export default function App() {
             {copiedLink ? (
               <>
                 <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Link copied</span>
+                <span className="hidden sm:inline">Copied</span>
               </>
             ) : (
               <>
@@ -222,10 +225,10 @@ export default function App() {
         {/* Stage */}
         <section
           aria-label="Mascot Stage"
-          className="flex flex-1 flex-col justify-between p-4 sm:p-7"
+          className="flex flex-1 flex-col p-3 sm:p-6"
         >
           <div
-            className={`relative flex min-h-[380px] w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border transition-colors duration-300 ${
+            className={`relative flex min-h-[340px] w-full flex-1 flex-col items-center justify-between overflow-hidden rounded-2xl border p-3 transition-colors duration-300 sm:min-h-[440px] sm:p-4 ${
               isLightStage
                 ? 'border-black/[0.1] bg-[#f5f4f0] text-zinc-900'
                 : 'border-white/[0.1] bg-[#0e0e13] text-zinc-100'
@@ -244,115 +247,158 @@ export default function App() {
               />
             )}
 
-            {/* Quick action triggers */}
-            <div className="absolute left-3.5 top-3.5 z-10 flex items-center gap-1.5">
-              {(['bounce', 'spin', 'wiggle'] as const).map((action) => (
+            {/* Top bar inside stage */}
+            <div className="relative z-10 flex w-full items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
+                {(['bounce', 'spin', 'wiggle'] as const).map((action) => (
+                  <button
+                    key={action}
+                    type="button"
+                    onClick={() => mindyRef.current?.trigger(action)}
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-medium capitalize transition-colors ${
+                      isLightStage
+                        ? 'border-black/10 bg-white/85 text-zinc-800 hover:bg-white'
+                        : 'border-white/12 bg-black/45 text-zinc-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    {action}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1.5">
                 <button
-                  key={action}
                   type="button"
-                  onClick={() => mindyRef.current?.trigger(action)}
-                  className={`rounded-lg border px-2.5 py-1 text-xs font-medium capitalize transition-colors ${
+                  onClick={() => setShowGrid((g) => !g)}
+                  aria-pressed={showGrid}
+                  title="Toggle dot grid"
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
                     isLightStage
-                      ? 'border-black/10 bg-white/80 text-zinc-800 hover:bg-white'
+                      ? 'border-black/10 bg-white/85 text-zinc-800 hover:bg-white'
                       : 'border-white/12 bg-black/45 text-zinc-200 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  {action}
+                  <Grid className="h-3.5 w-3.5" />
                 </button>
-              ))}
-            </div>
-
-            {/* Backdrop controls */}
-            <div className="absolute right-3.5 top-3.5 z-10 flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setShowGrid((g) => !g)}
-                aria-pressed={showGrid}
-                title="Toggle dot grid"
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
-                  isLightStage
-                    ? 'border-black/10 bg-white/80 text-zinc-800 hover:bg-white'
-                    : 'border-white/12 bg-black/45 text-zinc-200 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <Grid className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setStageTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-                title={isLightStage ? 'Switch to dark backdrop' : 'Switch to light backdrop'}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
-                  isLightStage
-                    ? 'border-black/10 bg-white/80 text-zinc-800 hover:bg-white'
-                    : 'border-white/12 bg-black/45 text-zinc-200 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {isLightStage ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-              </button>
-            </div>
-
-            {/* Mindy */}
-            <div className="relative z-10 flex items-center justify-center p-8">
-              <Mindy
-                ref={mindyRef}
-                mood={mood}
-                eyeState={eyeOverride === 'auto' ? undefined : eyeOverride}
-                eyeLean={eyeLean}
-                color={color}
-                size={size}
-                interactive={interactive}
-                hasNotification={hasNotification}
-                reducedMotion={reducedMode === 'auto' ? undefined : reducedMode === 'on'}
-              />
-            </div>
-
-            {interactive && (
-              <p
-                className={`pointer-events-none absolute bottom-3.5 text-xs ${
-                  isLightStage ? 'text-zinc-600' : 'text-zinc-400'
-                }`}
-              >
-                Hover Mindy to steer her gaze · Click to bounce
-              </p>
-            )}
-          </div>
-
-          {/* Mood selector */}
-          <div
-            role="group"
-            aria-label="Moods"
-            className="mt-4 flex w-full flex-wrap items-center justify-center gap-1.5"
-          >
-            {MINDY_MOODS.map((candidate) => {
-              const active = mood === candidate;
-              return (
                 <button
-                  key={candidate}
                   type="button"
-                  onClick={() => setMood(candidate)}
-                  aria-pressed={active}
-                  className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium capitalize transition-all ${
-                    active
-                      ? 'border-white bg-white text-zinc-950 shadow-sm'
-                      : 'border-white/[0.12] bg-white/[0.04] text-[#d4d4d8] hover:border-white/25 hover:bg-white/[0.08] hover:text-white'
+                  onClick={() => setStageTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+                  title={isLightStage ? 'Switch to dark backdrop' : 'Switch to light backdrop'}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+                    isLightStage
+                      ? 'border-black/10 bg-white/85 text-zinc-800 hover:bg-white'
+                      : 'border-white/12 bg-black/45 text-zinc-200 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  {candidate}
+                  {isLightStage ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
                 </button>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* Center area: Left mood rail (desktop) + Mindy */}
+            <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center py-4 md:py-0">
+              {/* Desktop: vertical mood rail inside left side of stage */}
+              <div
+                role="group"
+                aria-label="Moods"
+                className="hidden md:absolute md:left-0 md:top-1/2 md:z-20 md:flex md:-translate-y-1/2 md:flex-col md:gap-1.5"
+              >
+                {MINDY_MOODS.map((candidate) => {
+                  const active = mood === candidate;
+                  return (
+                    <button
+                      key={candidate}
+                      type="button"
+                      onClick={() => setMood(candidate)}
+                      aria-pressed={active}
+                      className={`rounded-xl border px-3 py-1.5 text-left text-[13px] font-medium capitalize transition-all ${
+                        active
+                          ? isLightStage
+                            ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
+                            : 'border-white bg-white text-zinc-950 shadow-sm'
+                          : isLightStage
+                            ? 'border-black/[0.1] bg-white/80 text-zinc-700 hover:border-black/25 hover:bg-white hover:text-zinc-950'
+                            : 'border-white/[0.12] bg-black/45 text-[#d4d4d8] hover:border-white/25 hover:bg-white/[0.1] hover:text-white'
+                      }`}
+                    >
+                      {candidate}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mindy centered (slightly padded left on md+ so it never crowds the rail) */}
+              <div className="flex max-w-full items-center justify-center px-4 md:pl-24">
+                <Mindy
+                  ref={mindyRef}
+                  mood={mood}
+                  eyeState={eyeOverride === 'auto' ? undefined : eyeOverride}
+                  eyeLean={eyeLean}
+                  color={color}
+                  size={size}
+                  interactive={interactive}
+                  hasNotification={hasNotification}
+                  reducedMotion={reducedMode === 'auto' ? undefined : reducedMode === 'on'}
+                  className="max-w-full"
+                />
+              </div>
+            </div>
+
+            {/* Bottom inside stage: mobile mood pills + desktop hint */}
+            <div className="relative z-10 flex w-full flex-col items-center gap-2.5">
+              {/* Mobile mood pills inside bottom of stage */}
+              <div
+                role="group"
+                aria-label="Moods"
+                className="flex w-full flex-wrap items-center justify-center gap-1.5 md:hidden"
+              >
+                {MINDY_MOODS.map((candidate) => {
+                  const active = mood === candidate;
+                  return (
+                    <button
+                      key={candidate}
+                      type="button"
+                      onClick={() => setMood(candidate)}
+                      aria-pressed={active}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium capitalize transition-all ${
+                        active
+                          ? isLightStage
+                            ? 'border-zinc-900 bg-zinc-900 text-white'
+                            : 'border-white bg-white text-zinc-950'
+                          : isLightStage
+                            ? 'border-black/[0.12] bg-white/80 text-zinc-700'
+                            : 'border-white/[0.12] bg-black/45 text-[#d4d4d8]'
+                      }`}
+                    >
+                      {candidate}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {interactive && (
+                <p
+                  className={`pointer-events-none text-center text-[11px] sm:text-xs ${
+                    isLightStage ? 'text-zinc-600' : 'text-zinc-400'
+                  }`}
+                >
+                  <span className="hidden sm:inline">Hover Mindy to steer her gaze · Click to bounce</span>
+                  <span className="sm:hidden">Tap Mindy to bounce</span>
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Right: Tuning & Export Panel */}
+        {/* Right / Mobile Bottom: Tuning & Export Panel */}
         <aside
           aria-label="Tuning Controls"
-          className="w-full shrink-0 border-t border-white/[0.1] bg-[#0c0c10] p-5 sm:p-6 lg:w-[392px] lg:border-l lg:border-t-0"
+          className="w-full min-w-0 shrink-0 border-t border-white/[0.1] bg-[#0c0c10] p-4 sm:p-6 lg:w-[392px] lg:border-l lg:border-t-0"
         >
           <div className="flex flex-col gap-5">
             {/* Color */}
             <Section label="Color">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {COLOR_SWATCHES.map((swatch) => {
                     const active = color.toLowerCase() === swatch.hex.toLowerCase();
@@ -461,7 +507,7 @@ export default function App() {
                 aria-label="Mascot size"
                 className="studio-slider w-full bg-white/15"
               />
-              <div className="mt-2.5 flex gap-1.5">
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {SIZE_PRESETS.map((preset) => (
                   <Chip key={preset} active={size === preset} onClick={() => setSize(preset)}>
                     {preset}px
@@ -483,7 +529,7 @@ export default function App() {
                   checked={hasNotification}
                   onChange={setHasNotification}
                 />
-                <div className="flex items-center justify-between pt-0.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
                   <span className="text-[13px] text-[#e4e4e7]">Reduced motion</span>
                   <div className="flex gap-1">
                     {(['auto', 'on', 'off'] as const).map((opt) => (

@@ -25,6 +25,7 @@ export interface MindyMotion {
   scaleX: MotionValue<number>;
   scaleY: MotionValue<number>;
   grayAmount: MotionValue<number>;
+  errorTintOpacity: MotionValue<number>;
 
   eyeState: MindyEyeState;
   eyeLeftD: MotionValue<string>;
@@ -39,18 +40,17 @@ export interface MindyMotion {
   eyeGlintRightR: MotionValue<number>;
   eyeGlintRightOp: MotionValue<number>;
 
-  // Ground shadow & bounce ripples
   shadowScale: MotionValue<number>;
   shadowOpacity: MotionValue<number>;
   rippleRx: MotionValue<number>;
   rippleRy: MotionValue<number>;
   rippleOpacity: MotionValue<number>;
 
-  // Body-hugging contour echo wave (used by alert & error)
   contourEchoScale: MotionValue<number>;
   contourEchoOpacity: MotionValue<number>;
+  contourEcho2Scale: MotionValue<number>;
+  contourEcho2Opacity: MotionValue<number>;
 
-  // Thinking: single sleek 3D orbital ring + luminous pearl
   orbitX: MotionValue<number>;
   orbitY: MotionValue<number>;
   orbitScale: MotionValue<number>;
@@ -58,12 +58,10 @@ export interface MindyMotion {
   orbitBackOp: MotionValue<number>;
   orbitCrownGlow: MotionValue<number>;
 
-  // Alert: body-attached crown flare
   alertFlareScale: MotionValue<number>;
   alertFlareOpacity: MotionValue<number>;
   alertCrownFlash: MotionValue<number>;
 
-  // Happy & Excited: cheek blush, twinkling glints, velocity arcs
   cheekBlushOpacity: MotionValue<number>;
   glint1Scale: MotionValue<number>;
   glint2Scale: MotionValue<number>;
@@ -73,14 +71,12 @@ export interface MindyMotion {
   glint6Scale: MotionValue<number>;
   excitedArcOffset: MotionValue<number>;
 
-  // Confused: body-attached sculpted '?' + motes
   questionY: MotionValue<number>;
   questionRotate: MotionValue<number>;
   questionOpacity: MotionValue<number>;
   mote1Y: MotionValue<number>;
   mote2Y: MotionValue<number>;
 
-  // Loading: liquid metaballs
   metaballLeftX: MotionValue<number>;
   metaballLeftY: MotionValue<number>;
   metaballRightX: MotionValue<number>;
@@ -88,14 +84,12 @@ export interface MindyMotion {
   metaballCenterX: MotionValue<number>;
   metaballCenterY: MotionValue<number>;
 
-  // Notification badge
   badgeFloatY: MotionValue<number>;
 
   setGaze: (x: number, y: number) => void;
   triggerAction: (action: MindyAction) => void;
 }
 
-/** Projects a point on a tilted 3D ellipse around (cx, cy). */
 function projectOrbitPoint(
   t: number,
   speed: number,
@@ -112,7 +106,7 @@ function projectOrbitPoint(
   const cosT = Math.cos(rad);
   const sinT = Math.sin(rad);
 
-  const depth = Math.sin(angle); // -1 = behind Mindy, +1 = in front
+  const depth = Math.sin(angle);
   const isFront = depth >= 0;
 
   return {
@@ -121,7 +115,6 @@ function projectOrbitPoint(
     scale: 0.72 + ((depth + 1) / 2) * 0.45,
     frontOp: isFront ? 0.75 + depth * 0.25 : 0,
     backOp: isFront ? 0 : 0.2 + (1 + depth) * 0.35,
-    // Brighten crown when orb passes overhead (near -PI/2)
     crownGlow: Math.max(0, -depth) * 0.65,
   };
 }
@@ -162,8 +155,8 @@ export function useMindyMotion({
   const squashY = useMotionValue(1);
   const scaleX = useTransform(squashY, (sy) => computeConservedScaleX(sy ?? 1));
   const grayAmount = useMotionValue(0);
+  const errorTintOpacity = useMotionValue(0);
 
-  // Gaze springs
   const gazeRawX = useMotionValue(0);
   const gazeRawY = useMotionValue(0);
   const gazeEyeX = useSpring(gazeRawX, { stiffness: 420, damping: 28 });
@@ -171,7 +164,6 @@ export function useMindyMotion({
   const headGazeX = useSpring(gazeRawX, { stiffness: 120, damping: 18 });
   const headGazeY = useSpring(gazeRawY, { stiffness: 120, damping: 18 });
 
-  // Eyes
   const initialLayout = computeSphericalEyeLayout(0, 0, targetEyeState, 1, eyeLean);
   const eyeLeftD = useMotionValue<string>(initialLayout.leftD);
   const eyeRightD = useMotionValue<string>(initialLayout.rightD);
@@ -185,18 +177,17 @@ export function useMindyMotion({
   const eyeGlintRightR = useMotionValue(initialLayout.glintRight.r);
   const eyeGlintRightOp = useMotionValue(initialLayout.glintRight.opacity);
 
-  // Shadows & ground ripples
   const shadowScale = useMotionValue(1);
   const shadowOpacity = useMotionValue(0.42);
   const rippleRx = useMotionValue(24);
   const rippleRy = useMotionValue(4);
   const rippleOpacity = useMotionValue(0);
 
-  // Contour echo wave
   const contourEchoScale = useMotionValue(1);
   const contourEchoOpacity = useMotionValue(0);
+  const contourEcho2Scale = useMotionValue(1);
+  const contourEcho2Opacity = useMotionValue(0);
 
-  // Thinking orbit
   const orbitX = useMotionValue(190);
   const orbitY = useMotionValue(96);
   const orbitScale = useMotionValue(1);
@@ -204,12 +195,10 @@ export function useMindyMotion({
   const orbitBackOp = useMotionValue(0);
   const orbitCrownGlow = useMotionValue(0);
 
-  // Alert crown flare
   const alertFlareScale = useMotionValue(1);
   const alertFlareOpacity = useMotionValue(0);
   const alertCrownFlash = useMotionValue(0);
 
-  // Happy & Excited
   const cheekBlushOpacity = useMotionValue(0);
   const glint1Scale = useMotionValue(0);
   const glint2Scale = useMotionValue(0);
@@ -219,14 +208,12 @@ export function useMindyMotion({
   const glint6Scale = useMotionValue(0);
   const excitedArcOffset = useMotionValue(0);
 
-  // Confused
   const questionY = useMotionValue(34);
   const questionRotate = useMotionValue(8);
   const questionOpacity = useMotionValue(0);
   const mote1Y = useMotionValue(24);
   const mote2Y = useMotionValue(44);
 
-  // Loading metaballs
   const metaballLeftX = useMotionValue(100);
   const metaballLeftY = useMotionValue(110);
   const metaballRightX = useMotionValue(100);
@@ -243,6 +230,56 @@ export function useMindyMotion({
   const blinkStageRef = useRef(0);
   const nextSaccadeRef = useRef(2.0);
   const saccadeHoldUntilRef = useRef(0);
+
+  // Reset mood-specific state cleanly whenever mood changes so nothing leaks across transitions
+  useEffect(() => {
+    if (mood !== 'happy') cheekBlushOpacity.set(0);
+    if (mood !== 'alert') {
+      alertFlareOpacity.set(0);
+      alertCrownFlash.set(0);
+      contourEcho2Opacity.set(0);
+    }
+    if (mood !== 'alert' && mood !== 'error') {
+      contourEchoOpacity.set(0);
+    }
+    if (mood !== 'confused') questionOpacity.set(0);
+    if (mood !== 'happy' && mood !== 'excited') {
+      rippleOpacity.set(0);
+      glint1Scale.set(0);
+      glint2Scale.set(0);
+      glint3Scale.set(0);
+      glint4Scale.set(0);
+      glint5Scale.set(0);
+      glint6Scale.set(0);
+    }
+    if (mood !== 'thinking') {
+      orbitFrontOp.set(0);
+      orbitBackOp.set(0);
+      orbitCrownGlow.set(0);
+    }
+    if (mood !== 'error') {
+      errorTintOpacity.set(0);
+    }
+  }, [
+    mood,
+    cheekBlushOpacity,
+    alertFlareOpacity,
+    alertCrownFlash,
+    contourEchoOpacity,
+    contourEcho2Opacity,
+    questionOpacity,
+    rippleOpacity,
+    glint1Scale,
+    glint2Scale,
+    glint3Scale,
+    glint4Scale,
+    glint5Scale,
+    glint6Scale,
+    orbitFrontOp,
+    orbitBackOp,
+    orbitCrownGlow,
+    errorTintOpacity,
+  ]);
 
   useEffect(() => {
     if (!active) return;
@@ -357,6 +394,8 @@ export function useMindyMotion({
         questionY.set(34);
         questionRotate.set(8);
         contourEchoOpacity.set(0);
+        contourEcho2Opacity.set(0);
+        errorTintOpacity.set(mood === 'error' ? 0.14 : 0);
         glint1Scale.set(mood === 'happy' || mood === 'excited' ? 0.9 : 0);
         glint2Scale.set(mood === 'happy' || mood === 'excited' ? 0.8 : 0);
         glint3Scale.set(mood === 'happy' || mood === 'excited' ? 0.85 : 0);
@@ -401,11 +440,6 @@ export function useMindyMotion({
         squashY.set(1 + 0.025 * breath);
         shadowScale.set(1 - 0.035 * breath);
         shadowOpacity.set(0.42 + 0.04 * breath);
-        cheekBlushOpacity.set(0);
-        alertFlareOpacity.set(0);
-        questionOpacity.set(0);
-        rippleOpacity.set(0);
-        contourEchoOpacity.set(0);
       } else if (mood === 'thinking') {
         bobY.set(Math.sin(t * 1.6) * 2.2);
         swayRotate.set(3.2 + Math.sin(t * 0.8) * 1.2 + headGazeX.get() * 8.0);
@@ -454,25 +488,26 @@ export function useMindyMotion({
         shadowScale.set(0.65 + (sep / 68) * 0.55);
         shadowOpacity.set(0.3 + (1 - sep / 68) * 0.16);
       } else if (mood === 'alert') {
-        // Unified startled bounce + body-hugging contour pulse + tight crown flare
-        const cycle = (t % 1.35) / 1.35;
-        const hop = cycle < 0.32 ? Math.sin((cycle / 0.32) * Math.PI) : 0;
+        const cycle = (t % 1.3) / 1.3;
+        const hop = cycle < 0.28 ? Math.sin((cycle / 0.28) * Math.PI) : 0;
 
-        bobY.set(-5.5 - hop * 4.0 + Math.sin(t * 2.4) * 0.8);
+        bobY.set(-6.0 - hop * 4.5 + Math.sin(t * 2.4) * 0.7);
         swayRotate.set(headGazeX.get() * 8.0);
-        squashY.set(1.05 + hop * 0.05);
+        squashY.set(1.06 + hop * 0.055);
 
-        // Contour echo pulse radiating directly from Mindy's silhouette
-        contourEchoScale.set(1.0 + cycle * 0.22);
-        contourEchoOpacity.set(Math.max(0, Math.pow(1 - cycle, 1.5) * 0.65));
+        // Staggered double contour echo radiating from Mindy's silhouette
+        contourEchoScale.set(1.0 + cycle * 0.24);
+        contourEchoOpacity.set(Math.max(0, Math.pow(1 - cycle, 1.4) * 0.72));
 
-        const flareBeat = Math.max(0, Math.sin(cycle * Math.PI * 2));
-        alertFlareScale.set(0.88 + hop * 0.24 + flareBeat * 0.08);
-        alertFlareOpacity.set(0.6 + hop * 0.4);
-        alertCrownFlash.set(0.45 + hop * 0.55);
+        const cycle2 = (cycle + 0.38) % 1;
+        contourEcho2Scale.set(1.0 + cycle2 * 0.24);
+        contourEcho2Opacity.set(Math.max(0, Math.pow(1 - cycle2, 1.5) * 0.45));
 
-        shadowScale.set(0.86 - hop * 0.08);
-        shadowOpacity.set(0.36 - hop * 0.08);
+        alertFlareScale.set(0.86 + hop * 0.28);
+        alertFlareOpacity.set(0.65 + hop * 0.35);
+        alertCrownFlash.set(0.5 + hop * 0.5);
+        shadowScale.set(0.85 - hop * 0.09);
+        shadowOpacity.set(0.35 - hop * 0.08);
       } else if (mood === 'happy') {
         const p = (t % 0.95) / 0.95;
         const sinP = Math.sin(p * Math.PI);
@@ -508,19 +543,20 @@ export function useMindyMotion({
         shadowScale.set(0.98);
         shadowOpacity.set(0.4);
       } else if (mood === 'error') {
-        // Unified wince: rhythmic micro-shiver + tucked squash + subtle contour pulse
-        const cycle = (t % 2.2) / 2.2;
-        const burst = cycle < 0.35 ? Math.sin((cycle / 0.35) * Math.PI * 5) * (1 - cycle / 0.35) : 0;
+        const cycle = (t % 2.1) / 2.1;
+        const burst = cycle < 0.36 ? Math.sin((cycle / 0.36) * Math.PI * 5) * (1 - cycle / 0.36) : 0;
 
         shakeX.set(burst * 4.5);
-        bobY.set(2.5 + Math.sin(t * 1.6) * 1.2);
-        swayRotate.set(burst * 2.2 + Math.sin(t * 1.7) * 2.4);
-        squashY.set(0.93 - Math.abs(burst) * 0.03 + Math.sin(t * 1.6) * 0.015);
+        bobY.set(3.0 + Math.sin(t * 1.5) * 1.1);
+        swayRotate.set(burst * 2.0 + Math.sin(t * 1.6) * 2.2);
+        squashY.set(0.92 - Math.abs(burst) * 0.03 + Math.sin(t * 1.5) * 0.015);
 
-        contourEchoScale.set(1.0 + cycle * 0.14);
-        contourEchoOpacity.set(cycle < 0.45 ? Math.max(0, (1 - cycle / 0.45) * 0.55) : 0);
+        // Subtle warm coral body pulse + contour ping
+        errorTintOpacity.set(0.1 + Math.abs(burst) * 0.16);
+        contourEchoScale.set(1.0 + cycle * 0.15);
+        contourEchoOpacity.set(cycle < 0.48 ? Math.max(0, (1 - cycle / 0.48) * 0.65) : 0);
 
-        shadowScale.set(1.04);
+        shadowScale.set(1.05);
         shadowOpacity.set(0.46);
       } else if (mood === 'excited') {
         const p = (t % 1.1) / 1.1;
@@ -587,6 +623,9 @@ export function useMindyMotion({
     rippleOpacity,
     contourEchoScale,
     contourEchoOpacity,
+    contourEcho2Scale,
+    contourEcho2Opacity,
+    errorTintOpacity,
     orbitX,
     orbitY,
     orbitScale,
@@ -631,11 +670,11 @@ export function useMindyMotion({
       animate(actionRotate, [0, 360], { duration: 0.9, ease: [0.22, 1, 0.36, 1] });
     }
     if (mood === 'alert') {
-      animate(squashY, [0.86, 1.12, 1.05], { duration: 0.36, ease: 'easeOut' });
+      animate(squashY, [0.86, 1.12, 1.06], { duration: 0.36, ease: 'easeOut' });
     }
     if (mood === 'error') {
       animate(shakeX, [0, -10, 8, -6, 4, -2, 0], { duration: 0.5, ease: 'easeOut' });
-      animate(grayAmount, [0, 0.42, 0.15], { duration: 0.9, times: [0, 0.25, 1] });
+      animate(grayAmount, [0, 0.38, 0.14], { duration: 0.9, times: [0, 0.25, 1] });
     } else {
       animate(grayAmount, 0, { duration: 0.2 });
       animate(shakeX, 0, { duration: 0.15 });
@@ -650,6 +689,7 @@ export function useMindyMotion({
     scaleX,
     scaleY: squashY,
     grayAmount,
+    errorTintOpacity,
     eyeState: currentEyeState,
     eyeLeftD,
     eyeRightD,
@@ -669,6 +709,8 @@ export function useMindyMotion({
     rippleOpacity,
     contourEchoScale,
     contourEchoOpacity,
+    contourEcho2Scale,
+    contourEcho2Opacity,
     orbitX,
     orbitY,
     orbitScale,

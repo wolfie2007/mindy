@@ -22,7 +22,7 @@ export function LoadingMindy({
     <div
       aria-hidden
       className={`pointer-events-auto relative select-none ${className ?? ''}`}
-      style={{ width: size, height: size }}
+      style={{ width: '100%', maxWidth: size, aspectRatio: '1 / 1' }}
     >
       <svg
         viewBox="0 0 200 215"

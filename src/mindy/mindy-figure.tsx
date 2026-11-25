@@ -131,7 +131,7 @@ export function MindyFigure({
         <GroundRipples m={m} stroke={rippleStroke} />
       )}
 
-      {/* Main character stack: everything attached to Mindy moves together here */}
+      {/* Main character stack */}
       <motion.g style={{ x: m.shakeX, y: m.bobY }}>
         <motion.g
           style={{
@@ -140,23 +140,38 @@ export function MindyFigure({
             transformOrigin: '100px 110px',
           }}
         >
-          {/* Back half of 3D thinking orbit (behind Mindy, moves with bob & tilt) */}
           {animated && mood === 'thinking' && <ThinkingBackOrbit m={m} colors={colors} ids={ids} />}
 
-          {/* Body-hugging contour echo wave for alert & error */}
+          {/* Body-hugging contour echo waves for alert & error */}
           {animated && (mood === 'alert' || mood === 'error') && (
-            <motion.path
-              d={m.bodyD}
-              fill="none"
-              stroke={contourEchoStroke}
-              strokeWidth="2.4"
-              style={{
-                scale: m.contourEchoScale,
-                opacity: m.contourEchoOpacity,
-                transformBox: 'fill-box',
-                transformOrigin: '100px 110px',
-              }}
-            />
+            <>
+              <motion.path
+                d={m.bodyD}
+                fill="none"
+                stroke={contourEchoStroke}
+                strokeWidth="2.8"
+                style={{
+                  scale: m.contourEchoScale,
+                  opacity: m.contourEchoOpacity,
+                  transformBox: 'fill-box',
+                  transformOrigin: '100px 110px',
+                }}
+              />
+              {mood === 'alert' && (
+                <motion.path
+                  d={m.bodyD}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                  style={{
+                    scale: m.contourEcho2Scale,
+                    opacity: m.contourEcho2Opacity,
+                    transformBox: 'fill-box',
+                    transformOrigin: '100px 110px',
+                  }}
+                />
+              )}
+            </>
           )}
 
           <motion.g
@@ -170,6 +185,15 @@ export function MindyFigure({
             {mood !== 'loading' ? (
               <motion.g style={{ filter: grayFilter }}>
                 <motion.path d={m.bodyD} fill={`url(#${ids.bodyGrad})`} />
+
+                {/* Subtle coral tint pulse inside body during error */}
+                {mood === 'error' && (
+                  <motion.path
+                    d={m.bodyD}
+                    fill="#fb7185"
+                    style={{ opacity: m.errorTintOpacity }}
+                  />
+                )}
 
                 {/* Top-left specular highlight */}
                 <path
@@ -262,7 +286,7 @@ export function MindyFigure({
             )}
           </motion.g>
 
-          {/* Body-locked mood layers (move & tilt as one with Mindy) */}
+          {/* Body-locked mood layers */}
           {animated && mood === 'thinking' && (
             <ThinkingFrontOrbit m={m} colors={colors} ids={ids} />
           )}

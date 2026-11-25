@@ -29,10 +29,7 @@ export function GroundRipples({ m, stroke }: { m: MindyMotion; stroke: string })
   );
 }
 
-/**
- * Back arc + rear phase of the 3D orbital ring.
- * Rendered inside Mindy's bob/rotate group so it moves as one with her.
- */
+/** Back arc + rear phase of the 3D orbital ring. */
 export function ThinkingBackOrbit({ m, colors, ids }: LayerProps) {
   return (
     <g>
@@ -62,14 +59,10 @@ export function ThinkingBackOrbit({ m, colors, ids }: LayerProps) {
   );
 }
 
-/**
- * Front arc + luminous orbital pearl + subtle overhead crown reflection.
- * Rendered inside Mindy's bob/rotate group so it stays locked to her movement.
- */
+/** Front arc + luminous orbital pearl + subtle overhead crown reflection. */
 export function ThinkingFrontOrbit({ m, colors, ids }: LayerProps) {
   return (
     <g>
-      {/* Soft crown illumination as the orb passes overhead */}
       <motion.path
         d="M 74 49 C 90 42 110 42 126 49"
         fill="none"
@@ -108,8 +101,8 @@ export function ThinkingFrontOrbit({ m, colors, ids }: LayerProps) {
 }
 
 /**
- * Tight geometric crown flare attached directly above Mindy's apex.
- * Rendered inside Mindy's bob/rotate group so it jumps and tilts with her.
+ * Sculpted teardrop crown sparks anchored directly above Mindy's apex.
+ * Rendered inside Mindy's bob/rotate group so they move as one with her.
  */
 export function AlertCrownFlare({ m, colors, ids }: LayerProps) {
   return (
@@ -119,38 +112,28 @@ export function AlertCrownFlare({ m, colors, ids }: LayerProps) {
         scale: m.alertFlareScale,
         opacity: m.alertFlareOpacity,
         transformBox: 'fill-box',
-        transformOrigin: '100px 40px',
+        transformOrigin: '100px 38px',
       }}
     >
-      {/* Center crisp flare ray */}
-      <line
-        x1="100"
-        y1="30"
-        x2="100"
-        y2="16"
-        stroke="#ffffff"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+      {/* Center teardrop spark */}
+      <path
+        d="M 100 12 C 102.8 18 103.5 23 100 31 C 96.5 23 97.2 18 100 12 Z"
+        fill="#ffffff"
       />
-      {/* Left & right angled rays */}
-      <line
-        x1="83"
-        y1="34"
-        x2="75"
-        y2="22"
-        stroke={colors.rimLight}
-        strokeWidth="3.0"
-        strokeLinecap="round"
-      />
-      <line
-        x1="117"
-        y1="34"
-        x2="125"
-        y2="22"
-        stroke={colors.rimLight}
-        strokeWidth="3.0"
-        strokeLinecap="round"
-      />
+      {/* Left angled teardrop spark */}
+      <g transform="rotate(-28 100 40)">
+        <path
+          d="M 100 15 C 102.2 20 102.6 24 100 30 C 97.4 24 97.8 20 100 15 Z"
+          fill={colors.rimLight}
+        />
+      </g>
+      {/* Right angled teardrop spark */}
+      <g transform="rotate(28 100 40)">
+        <path
+          d="M 100 15 C 102.2 20 102.6 24 100 30 C 97.4 24 97.8 20 100 15 Z"
+          fill={colors.rimLight}
+        />
+      </g>
     </motion.g>
   );
 }
@@ -167,10 +150,7 @@ export function HappyOverlay({ m, colors, ids }: LayerProps) {
   );
 }
 
-/**
- * Sculpted '?' glyph + curiosity motes anchored inside Mindy's transform stack
- * and color-harmonized with her active palette.
- */
+/** Sculpted '?' glyph + curiosity motes anchored inside Mindy's transform stack. */
 export function ConfusedOverlay({ m, colors, ids }: LayerProps) {
   return (
     <g>

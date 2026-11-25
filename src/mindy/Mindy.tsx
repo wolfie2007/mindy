@@ -145,7 +145,12 @@ export const Mindy = forwardRef<MindyHandle, MindyProps>(function Mindy(
       ref={hostRef}
       aria-hidden
       className={`pointer-events-auto relative select-none ${className ?? ''}`}
-      style={{ width: size, height: size, cursor: interactive ? 'pointer' : 'default' }}
+      style={{
+        width: '100%',
+        maxWidth: size,
+        aspectRatio: '1 / 1',
+        cursor: interactive ? 'pointer' : 'default',
+      }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onClick={handleClick}

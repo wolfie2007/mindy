@@ -109,7 +109,7 @@ function getHappyCrescent(cx: number, cy: number, w: number, hMax: number, open 
 }
 
 /**
- * Generates a rounded geometric chevron ('>' when dir=1, '<' when dir=-1) for wincing eyes.
+ * Generates a soft, squeezed curved chevron ('>' when dir=1, '<' when dir=-1).
  */
 function getWinceChevronPath(
   cx: number,
@@ -118,40 +118,38 @@ function getWinceChevronPath(
   persp = 1.0,
   open = 1.0,
 ): string {
-  const ax = -7.5 * persp;
-  const bx = 7.5 * persp;
-  const hh = 10.5 * Math.max(0.32, open);
-  const t = 2.6;
-
-  const dx = bx - ax;
-  const dy = hh;
-  const len = Math.hypot(dx, dy);
-  const nx = dy / len;
-  const ny = -dx / len;
-  const tx = dx / len;
-  const ty = dy / len;
+  const ax = -7.2 * persp;
+  const bx = 6.2 * persp;
+  const hh = 9.4 * Math.max(0.32, open);
+  const t = 2.45;
 
   const p = (lx: number, ly: number) => `${f(cx + lx * dir)} ${f(cy + ly)}`;
 
-  const topOuter = p(ax + nx * t, -hh + ny * t);
-  const tipUpper = p(bx + nx * t, ny * t);
+  // Softly bowed arms with rounded caps and rounded inner pinch
+  const topOuter = p(ax + 1.2, -hh - t * 0.85);
+  const topCtrlOuter = p(ax + 7.5 * persp, -hh * 0.35 - t);
+  const tipUpper = p(bx + 1.2, -t * 0.72);
   const tipApex = p(bx + t * 1.45, 0);
-  const tipLower = p(bx + nx * t, -ny * t);
-  const botOuter = p(ax + nx * t, hh - ny * t);
-  const botCapCtrl = p(ax - tx * t * 1.5, hh - ty * t * 1.5);
-  const botInner = p(ax - nx * t, hh + ny * t);
-  const innerApex = p(bx - t * 1.45, 0);
-  const topInner = p(ax - nx * t, -hh - ny * t);
-  const topCapCtrl = p(ax - tx * t * 1.5, -hh - ty * t * 1.5);
+  const tipLower = p(bx + 1.2, t * 0.72);
+  const botCtrlOuter = p(ax + 7.5 * persp, hh * 0.35 + t);
+  const botOuter = p(ax + 1.2, hh + t * 0.85);
+
+  const botCapCtrl = p(ax - t * 1.1, hh + t * 0.15);
+  const botInner = p(ax - 1.4, hh - t * 0.8);
+  const botCtrlInner = p(ax + 5.2 * persp, hh * 0.35 - t * 0.65);
+  const innerApex = p(bx - t * 1.25, 0);
+  const topCtrlInner = p(ax + 5.2 * persp, -hh * 0.35 + t * 0.65);
+  const topInner = p(ax - 1.4, -hh + t * 0.8);
+  const topCapCtrl = p(ax - t * 1.1, -hh - t * 0.15);
 
   return (
     `M ${topOuter} ` +
-    `L ${tipUpper} ` +
+    `Q ${topCtrlOuter} ${tipUpper} ` +
     `Q ${tipApex} ${tipLower} ` +
-    `L ${botOuter} ` +
+    `Q ${botCtrlOuter} ${botOuter} ` +
     `Q ${botCapCtrl} ${botInner} ` +
-    `L ${innerApex} ` +
-    `L ${topInner} ` +
+    `Q ${botCtrlInner} ${innerApex} ` +
+    `Q ${topCtrlInner} ${topInner} ` +
     `Q ${topCapCtrl} ${topOuter} Z`
   );
 }
@@ -212,8 +210,8 @@ export function computeSphericalEyeLayout(
 
   if (state === 'wince') {
     return {
-      leftD: getWinceChevronPath(cxL - 1, cyL + 1, 1, perspL, blinkOpen),
-      rightD: getWinceChevronPath(cxR + 1, cyR + 1, -1, perspR, blinkOpen),
+      leftD: getWinceChevronPath(cxL - 4, cyL + 3, 1, perspL, blinkOpen),
+      rightD: getWinceChevronPath(cxR + 4, cyR + 3, -1, perspR, blinkOpen),
       visible: true,
       glintLeft: { cx: cxL, cy: cyL, r: 0, opacity: 0 },
       glintRight: { cx: cxR, cy: cyR, r: 0, opacity: 0 },
